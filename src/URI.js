@@ -795,6 +795,26 @@
       throw new TypeError('URI.removeQuery() accepts an object, string, RegExp as the first parameter');
     }
   };
+  URI.hasQueryParameter = function(data, name, caseSensitive) {
+	  if (getType(name) !== 'String') {
+		  throw new TypeError("URI.hasQueryParameter() accepts a string as the name parameter");
+	  }
+	  if (getType(caseSensitive) !== 'Boolean') {
+		  throw new TypeError("URI.hasQueryParameter() accepts a boolean as the caseSensitive parameter");
+	  }
+	  if (caseSensitive) {
+		return name in data;
+	  } else {
+		  var lName = name.toLowerCase();
+		  for (var key in data) {
+			  if (key.toLowerCase() === lName) {
+				  return true;
+			  }
+		  }
+		  return false;
+	  }
+  }
+
   URI.hasQuery = function(data, name, value, withinArray) {
     switch (getType(name)) {
       case 'String':
@@ -1792,6 +1812,10 @@
   p.hasQuery = function(name, value, withinArray) {
     var data = URI.parseQuery(this._parts.query, this._parts.escapeQuerySpace);
     return URI.hasQuery(data, name, value, withinArray);
+  };
+  p.hasQueryParameter = function(name, caseSensitive) {
+    var data = URI.parseQuery(this._parts.query, this._parts.escapeQuerySpace);
+    return URI.hasQueryParameter(data, name, caseSensitive);
   };
   p.setSearch = p.setQuery;
   p.addSearch = p.addQuery;

@@ -991,6 +991,10 @@
     equal(u.hasQuery('string'), true, 'simple exists check - passing');
     equal(u.hasQuery('nono'), false, 'simple exists check - failing');
 
+    // exists case sensitive
+    equal(u.hasQueryParameter('STRING', true), false, 'case senstive hasQueryParameter');
+    equal(u.hasQueryParameter('STRING', false), true, 'case insenstive hasQueryParameter');
+
     // truthy value
     equal(u.hasQuery('string', true), true, 'has truthy value check - passing string');
     equal(u.hasQuery('number', true), true, 'has truthy value check - passing number');
