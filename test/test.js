@@ -992,8 +992,8 @@
     equal(u.hasQuery('nono'), false, 'simple exists check - failing');
 
     // exists case sensitive
-    equal(u.hasQueryParameter('STRING', true), false, 'case senstive hasQueryParameter');
-    equal(u.hasQueryParameter('STRING', false), true, 'case insenstive hasQueryParameter');
+    equal(u.hasQuery('STRING', undefined, undefined, true), false, 'case senstive hasQueryParameter');
+    equal(u.hasQuery('STRING', undefined, undefined, false), true, 'case insenstive hasQueryParameter');
 
     // truthy value
     equal(u.hasQuery('string', true), true, 'has truthy value check - passing string');

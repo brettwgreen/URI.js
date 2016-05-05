@@ -795,27 +795,8 @@
       throw new TypeError('URI.removeQuery() accepts an object, string, RegExp as the first parameter');
     }
   };
-  URI.hasQueryParameter = function(data, name, caseSensitive) {
-	  if (getType(name) !== 'String') {
-		  throw new TypeError("URI.hasQueryParameter() accepts a string as the name parameter");
-	  }
-	  if (getType(caseSensitive) !== 'Boolean') {
-		  throw new TypeError("URI.hasQueryParameter() accepts a boolean as the caseSensitive parameter");
-	  }
-	  if (caseSensitive) {
-		return name in data;
-	  } else {
-		  var lName = name.toLowerCase();
-		  for (var key in data) {
-			  if (key.toLowerCase() === lName) {
-				  return true;
-			  }
-		  }
-		  return false;
-	  }
-  }
 
-  URI.hasQuery = function(data, name, value, withinArray) {
+  URI.hasQuery = function(data, name, value, withinArray, caseSensitive) {
     switch (getType(name)) {
       case 'String':
         // Nothing to do here
@@ -846,53 +827,67 @@
       default:
         throw new TypeError('URI.hasQuery() accepts a string, regular expression or object as the name parameter');
     }
-
+    if (getType(caseSensitive) !== 'Boolean') {
+	    caseSensitive = true;
+	}
+	var xData;
+	if (caseSensitive) {
+        xData = data[name];
+	} else {
+        var lName = name.toLowerCase();
+        for (var key in data) {
+            if (key.toLowerCase() === lName) {
+                xData = data[key];
+                break;
+            }
+        }
+    }
     switch (getType(value)) {
       case 'Undefined':
         // true if exists (but may be empty)
-        return name in data; // data[name] !== undefined;
+        return getType(xData) !== 'Undefined';
 
       case 'Boolean':
         // true if exists and non-empty
-        var _booly = Boolean(isArray(data[name]) ? data[name].length : data[name]);
+        var _booly = Boolean(isArray(xData) ? xData.length : xData);
         return value === _booly;
 
       case 'Function':
         // allow complex comparison
-        return !!value(data[name], name, data);
+        return !!value(xData, name, data);
 
       case 'Array':
-        if (!isArray(data[name])) {
+        if (!isArray(xData)) {
           return false;
         }
 
         var op = withinArray ? arrayContains : arraysEqual;
-        return op(data[name], value);
+        return op(xData, value);
 
       case 'RegExp':
         if (!isArray(data[name])) {
-          return Boolean(data[name] && data[name].match(value));
+          return Boolean(xData && xData.match(value));
         }
 
         if (!withinArray) {
           return false;
         }
 
-        return arrayContains(data[name], value);
+        return arrayContains(xData, value);
 
       case 'Number':
         value = String(value);
         /* falls through */
       case 'String':
-        if (!isArray(data[name])) {
-          return data[name] === value;
+        if (!isArray(xData)) {
+          return xData === value;
         }
 
         if (!withinArray) {
           return false;
         }
 
-        return arrayContains(data[name], value);
+        return arrayContains(xData, value);
 
       default:
         throw new TypeError('URI.hasQuery() accepts undefined, boolean, string, number, RegExp, Function as the value parameter');
@@ -1809,13 +1804,9 @@
     this.build(!build);
     return this;
   };
-  p.hasQuery = function(name, value, withinArray) {
+  p.hasQuery = function(name, value, withinArray, caseSensitive) {
     var data = URI.parseQuery(this._parts.query, this._parts.escapeQuerySpace);
-    return URI.hasQuery(data, name, value, withinArray);
-  };
-  p.hasQueryParameter = function(name, caseSensitive) {
-    var data = URI.parseQuery(this._parts.query, this._parts.escapeQuerySpace);
-    return URI.hasQueryParameter(data, name, caseSensitive);
+    return URI.hasQuery(data, name, value, withinArray, caseSensitive);
   };
   p.setSearch = p.setQuery;
   p.addSearch = p.addQuery;
